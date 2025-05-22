@@ -62,18 +62,18 @@ senhaGroup.appendChild(senhaLabel);
 form.appendChild(senhaGroup);
 
 // Campo Senha de Recuperação
-const senhaRecuperacaoGroup = document.createElement('div');
-senhaRecuperacaoGroup.classList.add('input-group');
-const senhaRecuperacaoInput = document.createElement('input');
-senhaRecuperacaoInput.type = 'password';
-senhaRecuperacaoInput.id = 'senhaRecuperacao';
-senhaRecuperacaoInput.placeholder = 'Senha de Recuperação';
-const senhaRecuperacaoLabel = document.createElement('label');
-senhaRecuperacaoLabel.setAttribute('for', 'senhaRecuperacao');
-senhaRecuperacaoLabel.textContent = 'Senha de Recuperação';
-senhaRecuperacaoGroup.appendChild(senhaRecuperacaoInput);
-senhaRecuperacaoGroup.appendChild(senhaRecuperacaoLabel);
-form.appendChild(senhaRecuperacaoGroup);
+const palavrachaveGroup = document.createElement('div');
+palavrachaveGroup.classList.add('input-group');
+const palavrachaveInput = document.createElement('input');
+palavrachaveInput.type = 'password';
+palavrachaveInput.id = 'senhaRecuperacao';
+palavrachaveInput.placeholder = 'Senha de Recuperação';
+const palavrachaveLabel = document.createElement('label');
+palavrachaveLabel.setAttribute('for', 'senhaRecuperacao');
+palavrachaveLabel.textContent = 'Senha de Recuperação';
+palavrachaveGroup.appendChild(palavrachaveInput);
+palavrachaveGroup.appendChild(palavrachaveLabel);
+form.appendChild(palavrachaveGroup);
 
 
 const submitButton = document.createElement('button');
@@ -94,3 +94,48 @@ cadastroSection.appendChild(errorMessage);
 const loginLink = document.createElement('p');
 loginLink.innerHTML = 'Já tem um? <a href="../index.html">login</a>';
 cadastroSection.appendChild(loginLink);
+
+
+// Evento de submit do formulário
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = emailInput.value.trim();
+    const senha = senhaInput.value.trim();
+    const nome = nomeInput.value.trim();    
+    const palavra_chave = palavrachaveInput.value.trim();
+    const foto_perfil = ''
+        
+    if (!nome || !email || !senha || !palavra_chave) {
+       
+        errorMessage.textContent = 'Preencha todos os campos!';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    try {
+        const response = await fetch('http://10.107.144.11:8080/v1/controle-receitas/usuario', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nome, email, senha, palavra_chave, foto_perfil })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro ao realizar cadastro');
+        }
+
+        // Armazena o token e os dados do usuário no localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user)); // Aqui você salva os dados do usuário
+
+        // Redireciona para a tela de login
+        window.location.href = '../index.html';
+    } catch (error) {
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
+    }
+});
